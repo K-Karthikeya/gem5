@@ -20,8 +20,8 @@ def template AVXOpDeclare {{
       public:
         %(class_name)s(ExtMachInst _machInst, const char *_instMnem,
                        uint64_t _setFlags, SrcType _srcType,
-                       InstRegIndex _dest, InstRegIndex _src1,
-                       InstRegIndex _src2, uint8_t _destSize, uint8_t _destVL,
+                       RegId _dest, RegId _src1,
+                       RegId _src2, uint8_t _destSize, uint8_t _destVL,
                        uint8_t _srcSize, uint8_t _srcVL,
                        uint8_t _imm8, uint8_t _ext);
         Fault execute(ExecContext *, trace::InstRecord *) const;
@@ -31,7 +31,7 @@ def template AVXOpDeclare {{
 def template AVXOpConstructor {{
     %(class_name)s::%(class_name)s(ExtMachInst _machInst, const char *_instMnem,
         uint64_t _setFlags, SrcType _srcType,
-        InstRegIndex _dest, InstRegIndex _src1, InstRegIndex _src2,
+        RegId _dest, RegId _src1, RegId _src2,
         uint8_t _destSize, uint8_t _destVL, uint8_t _srcSize, uint8_t _srcVL,
         uint8_t _imm8, uint8_t _ext)
       : %(base_class)s(_machInst, "%(mnemonic)s", _instMnem, _setFlags,
@@ -72,7 +72,7 @@ let {{
 
     class AVXOp(X86Microop, metaclass=AVXOpMeta):
         abstract = True
-        def __init__(self, dest, src1='InstRegIndex(0)', src2='InstRegIndex(0)',
+        def __init__(self, dest, src1='RegId(floatRegClass, 0)', src2='RegId(floatRegClass, 0)',
                      destSize=0, destVL=16, srcSize=0, srcVL=16,
                      imm8=0, ext=0):
             self.dest = dest; self.src1 = src1; self.src2 = src2
@@ -97,13 +97,13 @@ let {{
         constructorCode = """
             auto vRegs = destVL / sizeof(uint64_t);
             _numDestRegs = vRegs;
-            _numFPDestRegs = _numDestRegs;
+            _numTypedDestRegs[FloatRegClass] = vRegs;
             for (int i = 0; i < _numDestRegs; ++i)
-                setDestRegIdx(i, RegId(FloatRegClass, dest + i));
+                setDestRegIdx(i, RegId(floatRegClass, dest + i));
         """
         code = """
             for (int i = 0; i < _numDestRegs; ++i)
-                xc->setFloatRegOperandBits(this, i, 0);
+                xc->setRegOperand(this, i, (RegVal)0);
         """
 
     class varithp(AVXOp):
@@ -117,8 +117,8 @@ let {{
             auto vRegs = destVL / sizeof(uint64_t);
             _numSrcRegs = 2 * vRegs;
             for (int i = 0; i < vRegs; ++i) {
-                setSrcRegIdx(i*2, RegId(FloatRegClass, src1 + i));
-                setSrcRegIdx(i*2+1, RegId(FloatRegClass, src2 + i));
+                setSrcRegIdx(i*2, RegId(floatRegClass, src1 + i));
+                setSrcRegIdx(i*2+1, RegId(floatRegClass, src2 + i));
             }
         """
 

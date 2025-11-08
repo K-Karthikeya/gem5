@@ -10,7 +10,7 @@ namespace gem5 { namespace X86ISA {
 
 std::string
 AVXOpBase::generateDisassembly(gem5::Addr pc,
-                               const Loader::SymbolTable *symtab) const {
+                               const loader::SymbolTable *symtab) const {
   std::stringstream response;
 
   printMnemonic(response, instMnem, mnemonic);
@@ -136,10 +136,10 @@ void AVXOpBase::doPackedBinaryOp(gem5::ExecContext *xc, AVXOpBase::BinaryOp op) 
   FloatInt src1;
   FloatInt src2;
   for (int i = 0; i < vRegs; i++) {
-    src1.ul = xc->readFloatRegOperandBits(this, i * 2 + 0);
-    src2.ul = xc->readFloatRegOperandBits(this, i * 2 + 1);
+    src1.ul = xc->getRegOperand(this, i * 2 + 0);
+    src2.ul = xc->getRegOperand(this, i * 2 + 1);
     auto dest = this->calcPackedBinaryOp(src1, src2, op);
-    xc->setFloatRegOperandBits(this, i, dest.ul);
+    xc->setRegOperand(this, i, dest.ul);
   }
 }
 
@@ -150,12 +150,12 @@ void AVXOpBase::doFusedPackedBinaryOp(gem5::ExecContext *xc, AVXOpBase::BinaryOp
   FloatInt src2;
   FloatInt src3;
   for (int i = 0; i < vRegs; i++) {
-    src1.ul = xc->readFloatRegOperandBits(this, i * 3 + 0);
-    src2.ul = xc->readFloatRegOperandBits(this, i * 3 + 1);
-    src3.ul = xc->readFloatRegOperandBits(this, i * 3 + 2);
+    src1.ul = xc->getRegOperand(this, i * 3 + 0);
+    src2.ul = xc->getRegOperand(this, i * 3 + 1);
+    src3.ul = xc->getRegOperand(this, i * 3 + 2);
     auto tmp = this->calcPackedBinaryOp(src1, src2, op1);
     auto dest = this->calcPackedBinaryOp(tmp, src3, op2);
-    xc->setFloatRegOperandBits(this, i, dest.ul);
+    xc->setRegOperand(this, i, dest.ul);
   }
 }
 

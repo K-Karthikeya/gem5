@@ -39,7 +39,7 @@ protected:
   // Constructor
   AVXOpBase(ExtMachInst _machInst, const char *_mnem, const char *_instMnem,
             uint64_t _setFlags, OpClass _opClass, SrcType _srcType,
-            InstRegIndex _dest, InstRegIndex _src1, InstRegIndex _src2,
+            RegId _dest, RegId _src1, RegId _src2,
             uint8_t _destSize, uint8_t _destVL, uint8_t _srcSize,
             uint8_t _srcVL, uint8_t _imm8, uint8_t _ext)
       : X86MicroopBase(_machInst, _mnem, _instMnem, _setFlags, _opClass),
@@ -51,7 +51,7 @@ protected:
   }
 
   std::string generateDisassembly(gem5::Addr pc,
-                                  const Loader::SymbolTable *symtab) const;
+                                  const loader::SymbolTable *symtab) const;
 
   union FloatInt {
     struct __attribute__((packed)) {
@@ -114,10 +114,10 @@ protected:
   inline void addAVXDestRegs() {
     auto vDestRegs = destVL / sizeof(uint64_t);
     assert(vDestRegs <= NumXMMSubRegs && "DestVL overflow.");
-    _numDestRegs = _numFPDestRegs = vDestRegs;
-    assert(_numDestRegs <= MaxInstDestRegs && "DestRegs overflow.");
+    _numDestRegs = vDestRegs;
+    _numTypedDestRegs[FloatRegClass] = vDestRegs;
     for (int i = 0; i < vDestRegs; i++) {
-      setDestRegIdx(i, RegId(FloatRegClass, dest + i));
+      setDestRegIdx(i, RegId(floatRegClass, dest + i));
     }
   }
 };
