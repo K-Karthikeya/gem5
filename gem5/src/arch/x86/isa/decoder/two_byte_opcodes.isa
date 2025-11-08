@@ -384,8 +384,7 @@
                 default: UD2();
             }
             // Inline minimal AVX (VEX) subset decode formerly in two_byte_opcodes_vex.isa
-            0x1: format Inst {
-                decode OPCODE_OP {
+            0x1: decode OPCODE_OP {
                     0x58: decode VEX_L {
                         0x1: VADDPS_YMM_YMM();
                         0x0: VADDPS_XMM_XMM();
@@ -415,7 +414,6 @@
                         0x0: VMOVAPS_M_XMM();
                     }
                     0x77: VZEROUPPER();
-                }
             }
         }
         format Inst {
