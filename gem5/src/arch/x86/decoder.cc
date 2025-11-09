@@ -228,7 +228,7 @@ Decoder::doVex2Of2State(uint8_t nextByte)
         break;
     }
 
-    emi.opcode.type = TwoByteOpcode;
+  emi.opcode.type = TwoByteOpcodeVEX;
 
     return VexOpcodeState;
 }
@@ -254,7 +254,7 @@ Decoder::doVex2Of3State(uint8_t nextByte)
 
     switch (vex.m) {
       case 1:
-        emi.opcode.type = TwoByteOpcode;
+        emi.opcode.type = TwoByteOpcodeVEX;
         break;
       case 2:
         emi.opcode.type = ThreeByte0F38Opcode;
@@ -326,7 +326,8 @@ Decoder::doVexOpcodeState(uint8_t nextByte)
         // will dispatch to the VEX variants.
         DPRINTF(Decoder, "VEX dispatch: type=TwoByte op=%#x L=%u present=%u\n",
                 emi.opcode.op, (unsigned)emi.evex.l, (unsigned)emi.evex.vex_present);
-        return processOpcode(ImmediateTypeTwoByte, UsesModRMTwoByte);
+      emi.opcode.type = TwoByteOpcodeVEX;
+      return processOpcode(ImmediateTypeTwoByte, UsesModRMTwoByte);
       case ThreeByte0F38Opcode:
         return processOpcode(ImmediateTypeThreeByte0F38,
                              UsesModRMThreeByte0F38);

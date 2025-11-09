@@ -211,6 +211,7 @@ enum OpcodeType
     BadOpcode,
     OneByteOpcode,
     TwoByteOpcode,
+    TwoByteOpcodeVEX,
     ThreeByte0F38Opcode,
     ThreeByte0F3AOpcode,
 };
@@ -225,6 +226,8 @@ opcodeTypeToStr(OpcodeType type)
         return "one byte";
       case TwoByteOpcode:
         return "two byte";
+            case TwoByteOpcodeVEX:
+                return "two byte vex";
       case ThreeByte0F38Opcode:
         return "three byte 0f38";
       case ThreeByte0F3AOpcode:

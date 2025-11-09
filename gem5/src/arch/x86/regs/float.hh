@@ -225,6 +225,15 @@ inline constexpr float_reg::FloatRegIndex FLOATREG_XMM_HIGH(int reg)
         float_reg::XmmBase + NumXMMSubRegs * reg + 1);
 }
 
+// Return the sub-register index for XMM register 'reg' and 64-bit lane 'sub'.
+// This mirrors the legacy FLOATREG_XMM_IDX(reg, sub) macro that used to
+// expand to enumerator names. We translate directly to a FlatFloatReg index.
+inline constexpr float_reg::FloatRegIndex FLOATREG_XMM_IDX(int reg, int sub)
+{
+    return static_cast<float_reg::FloatRegIndex>(
+        float_reg::XmmBase + NumXMMSubRegs * reg + sub);
+}
+
 } // namespace X86ISA
 } // namespace gem5
 

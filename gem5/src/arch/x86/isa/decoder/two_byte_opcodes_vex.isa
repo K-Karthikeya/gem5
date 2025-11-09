@@ -5,11 +5,9 @@
 // instructions when VEX_PRESENT == 1. We only implement a small AVX2
 // floating-point subset (no AVX-512).
 
-'X86ISA::TwoByteOpcode': decode VEX_PRESENT {
-    0x1: decode OPCODE_OP {
+'X86ISA::TwoByteOpcodeVEX': format Inst decode OPCODE_OP {
         // Wrap instruction definitions in a format block so gem5 assigns the
         // standard Inst format (required for generating StaticInst objects).
-        format Inst {
             0x58: decode VEX_L {
                 0x1: VADDPS_YMM_YMM();
                 0x0: VADDPS_XMM_XMM();
@@ -40,6 +38,5 @@
             }
             0x77: VZEROUPPER();
             default: UD2();
-        }
     }
 }
