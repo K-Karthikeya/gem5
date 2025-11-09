@@ -51,8 +51,8 @@ protected:
     assert((srcVL % sizeof(uint64_t) == 0) && "Invalid srcVL.\n");
   }
 
-  std::string generateDisassembly(gem5::Addr pc,
-                                  const loader::SymbolTable *symtab) const;
+  inline std::string generateDisassembly(gem5::Addr pc,
+                                         const loader::SymbolTable *symtab) const;
 
   union FloatInt {
     struct __attribute__((packed)) {
@@ -105,11 +105,11 @@ protected:
     IntXor,
   };
 
-  FloatInt calcPackedBinaryOp(FloatInt src1, FloatInt src2, BinaryOp op) const;
+  inline FloatInt calcPackedBinaryOp(FloatInt src1, FloatInt src2, BinaryOp op) const;
   // A helper function to perform packed src1 op src2
-  void doPackedBinaryOp(gem5::ExecContext *xc, BinaryOp op) const;
+  inline void doPackedBinaryOp(gem5::ExecContext *xc, BinaryOp op) const;
   // A helper function to perform packed (src1 op1 src2) op2 src3
-  void doFusedPackedBinaryOp(gem5::ExecContext *xc, BinaryOp op1, BinaryOp op2) const;
+  inline void doFusedPackedBinaryOp(gem5::ExecContext *xc, BinaryOp op1, BinaryOp op2) const;
 
   // A helper function to add dest regs.
   inline void addAVXDestRegs() {

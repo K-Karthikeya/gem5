@@ -8,7 +8,7 @@
 
 namespace gem5 { namespace X86ISA {
 
-std::string
+inline std::string
 AVXOpBase::generateDisassembly(gem5::Addr pc,
                                const loader::SymbolTable *symtab) const {
   std::stringstream response;
@@ -49,8 +49,8 @@ AVXOpBase::generateDisassembly(gem5::Addr pc,
   return response.str();
 }
 
-AVXOpBase::FloatInt AVXOpBase::calcPackedBinaryOp(FloatInt src1, FloatInt src2,
-                                                  AVXOpBase::BinaryOp op) const {
+inline AVXOpBase::FloatInt AVXOpBase::calcPackedBinaryOp(FloatInt src1, FloatInt src2,
+                                                         AVXOpBase::BinaryOp op) const {
   FloatInt dest;
   if (this->srcSize == 4) {
     // 2 float.
@@ -131,7 +131,7 @@ AVXOpBase::FloatInt AVXOpBase::calcPackedBinaryOp(FloatInt src1, FloatInt src2,
   return dest;
 }
 
-void AVXOpBase::doPackedBinaryOp(gem5::ExecContext *xc, AVXOpBase::BinaryOp op) const {
+inline void AVXOpBase::doPackedBinaryOp(gem5::ExecContext *xc, AVXOpBase::BinaryOp op) const {
   auto vRegs = destVL / sizeof(uint64_t);
   FloatInt src1;
   FloatInt src2;
@@ -143,8 +143,8 @@ void AVXOpBase::doPackedBinaryOp(gem5::ExecContext *xc, AVXOpBase::BinaryOp op) 
   }
 }
 
-void AVXOpBase::doFusedPackedBinaryOp(gem5::ExecContext *xc, AVXOpBase::BinaryOp op1,
-                                      AVXOpBase::BinaryOp op2) const {
+inline void AVXOpBase::doFusedPackedBinaryOp(gem5::ExecContext *xc, AVXOpBase::BinaryOp op1,
+                                             AVXOpBase::BinaryOp op2) const {
   auto vRegs = destVL / sizeof(uint64_t);
   FloatInt src1;
   FloatInt src2;

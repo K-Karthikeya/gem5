@@ -291,6 +291,29 @@ X86StaticInst::generateDisassembly(
     return ss.str();
 }
 
+void
+X86StaticInst::divideStep(uint64_t dividend, uint64_t divisor,
+                          uint64_t &quotient, uint64_t &remainder)
+{
+    // This implements a single step of long division (restoring division).
+    // It's used by X86 division microops which compute division iteratively.
+    
+    // Shift the quotient left by 1 bit to make room for the next bit
+    quotient <<= 1;
+    
+    // Shift the remainder left by 1 and bring down the next bit from dividend
+    remainder = (remainder << 1) | ((dividend >> 63) & 1);
+    
+    // Try to subtract divisor from remainder
+    if (remainder >= divisor) {
+        remainder -= divisor;
+        quotient |= 1;  // Set the least significant bit of quotient
+    }
+    
+    // Shift dividend left for next iteration
+    dividend <<= 1;
+}
+
 } // namespace X86ISA
 
 } // namespace gem5
