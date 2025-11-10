@@ -37,6 +37,14 @@ public:
   }
 
 protected:
+  // Register index backing arrays (per-instance). We overprovision to avoid
+  // overflow for future wider vectors. These must be members so that
+  // setRegIdxArrays can take member pointers to arrays (required by StaticInst).
+  static constexpr int MaxSrcRegs = 32;
+  static constexpr int MaxDestRegs = 32;
+  RegId srcRegIdxArr[MaxSrcRegs];
+  RegId destRegIdxArr[MaxDestRegs];
+
   const SrcType srcType;
   const RegIndex dest;
   const RegIndex src1;
@@ -58,6 +66,13 @@ protected:
         srcType(_srcType), dest(_dest.index()), src1(_src1.index()),
         src2(_src2.index()), destSize(_destSize), destVL(_destVL),
         srcSize(_srcSize), srcVL(_srcVL), imm8(_imm8), ext(_ext) {
+    // Install register index arrays before any set{Src,Dest}RegIdx calls.
+    setRegIdxArrays(
+        reinterpret_cast<RegIdArrayPtr>(&AVXOpBase::srcRegIdxArr),
+        reinterpret_cast<RegIdArrayPtr>(&AVXOpBase::destRegIdxArr));
+    _numSrcRegs = 0;
+    _numDestRegs = 0;
+    for (auto &c : _numTypedDestRegs) { c = 0; }
     fprintf(stderr, "[AVX-CONSTRUCT] mnem=%s destVL=%u srcVL=%u dest=%u src1=%u src2=%u\n",
             _mnem, destVL, srcVL, dest, src1, src2);
     assert((destVL % sizeof(uint64_t) == 0) && "Invalid destVL.\n");
