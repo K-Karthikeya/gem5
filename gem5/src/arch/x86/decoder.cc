@@ -320,6 +320,12 @@ Decoder::doVexOpcodeState(uint8_t nextByte)
     consumeByte();
 
     switch (emi.opcode.type) {
+      case TwoByteOpcodeVEX:
+        // Already marked as VEX two-byte (set in earlier VEX prefix state).
+        // Reuse the standard two-byte opcode table with VEX_PRESENT set.
+        DPRINTF(Decoder, "VEX dispatch (pre-set): type=TwoByteVEX op=%#x L=%u present=%u\n",
+                emi.opcode.op, (unsigned)emi.evex.l, (unsigned)emi.evex.vex_present);
+        return processOpcode(ImmediateTypeTwoByte, UsesModRMTwoByte);
       case TwoByteOpcode:
         // Use the same opcode tables but with VEX_PRESENT set; the
         // generated decoder (via two_byte_opcodes_vex.isa include)
