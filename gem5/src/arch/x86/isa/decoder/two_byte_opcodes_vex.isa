@@ -6,18 +6,20 @@
 
 'X86ISA::TwoByteOpcodeVEX': decode OPCODE_OP {
     format Inst {
-        // Arithmetic ops (reg-reg only, no memory form, no ModRM needed)
+        // Arithmetic ops: reg-reg forms STILL use ModRM (reg = dest, r/m = src2).
+        // Pass M operand tag to force specializeInst() to parse ModRM so env.reg,
+        // env.regm, and machInst.evex.v_extend yield distinct bases.
         0x58: decode VEX_L {
-            0x1: VADDPS_YMM_YMM();
-            0x0: VADDPS_XMM_XMM();
+            0x1: VADDPS_YMM_YMM(M);
+            0x0: VADDPS_XMM_XMM(M);
         }
         0x59: decode VEX_L {
-            0x1: VMULPS_YMM_YMM();
-            0x0: VMULPS_XMM_XMM();
+            0x1: VMULPS_YMM_YMM(M);
+            0x0: VMULPS_XMM_XMM(M);
         }
         0x57: decode VEX_L {
-            0x1: VXORPS_YMM_YMM();
-            0x0: VXORPS_XMM_XMM();
+            0x1: VXORPS_YMM_YMM(M);
+            0x0: VXORPS_XMM_XMM(M);
         }
         // Load from memory (M operand triggers doModRM via specializeInst)
         0x10: decode VEX_L {
