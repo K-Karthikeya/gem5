@@ -512,8 +512,8 @@ let {{
 
     defineMicroLoadOp('Ldfp', code='''
         FpData_uqw = Mem;
-        fprintf(stderr, "[LDFP-EXEC] EA=%#lx loaded=%#016llx dest=FloatReg %u\\n",
-                (unsigned long)EA, (unsigned long long)Mem,
+        fprintf(stderr, "[LDFP-EXEC] loaded=%#016llx dest=FloatReg %u\\n",
+                (unsigned long long)Mem,
                 (unsigned)destRegIdx(0).index());
     ''', big=False, is_float=True)
 
@@ -662,9 +662,9 @@ let {{
     defineMicroStoreOp('Stul', 'Mem = PData;', mem_flags="Request::LOCKED_RMW")
 
     defineMicroStoreOp('Stfp', code='''
-        fprintf(stderr, "[STFP-EXEC] src=FloatReg %u value=%#016llx EA=%#lx\\n",
+        fprintf(stderr, "[STFP-EXEC] src=FloatReg %u value=%#016llx\\n",
                 (unsigned)srcRegIdx(0).index(),
-                (unsigned long long)FpData_uqw, (unsigned long)EA);
+                (unsigned long long)FpData_uqw);
         Mem = FpData_uqw;
     ''', is_float=True)
 
