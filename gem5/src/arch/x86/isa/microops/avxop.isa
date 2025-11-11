@@ -117,11 +117,10 @@ let {{
         def __init__(self, dest, destVL):
             super().__init__(dest=dest, destVL=destVL, destSize=destVL)
         constructorCode = """
-            auto vRegs = destVL / sizeof(uint64_t);
-            _numDestRegs = vRegs;
-            _numTypedDestRegs[FloatRegClass] = vRegs;
-            for (int i = 0; i < _numDestRegs; ++i)
-                setDestRegIdx(i, RegId(floatRegClass, dest + i));
+            fprintf(stderr, "[VCLEAR-CONSTRUCT] dest=%u destVL=%u\\n", 
+                    (unsigned)dest, (unsigned)destVL);
+            // Use the standard AVX destination register setup instead of manual manipulation
+            this->addAVXDestRegs();
         """
         code = """
             for (int i = 0; i < _numDestRegs; ++i)

@@ -29,7 +29,22 @@ public:
     RegRegReg, // Three opreands.
   };
 
+  // Ensure we see size() calls for AVX microops specifically.
+  void size(size_t newSize) override {
+    fprintf(stderr, "[AVXOP-SIZE] inst=%s micro=%s this=%p newSize=%zu\n",
+            instMnem, mnemonic, (void*)this, newSize);
+    X86MicroopBase::size(newSize);
+  }
+
 protected:
+  // Register index backing arrays (per-instance). We overprovision to avoid
+  // overflow for future wider vectors. These must be members so that
+  // setRegIdxArrays can take member pointers to arrays (required by StaticInst).
+  static constexpr int MaxSrcRegs = 32;
+  static constexpr int MaxDestRegs = 32;
+  RegId srcRegIdxArr[MaxSrcRegs];
+  RegId destRegIdxArr[MaxDestRegs];
+
   const SrcType srcType;
   const RegIndex dest;
   const RegIndex src1;
@@ -51,6 +66,15 @@ protected:
         srcType(_srcType), dest(_dest.index()), src1(_src1.index()),
         src2(_src2.index()), destSize(_destSize), destVL(_destVL),
         srcSize(_srcSize), srcVL(_srcVL), imm8(_imm8), ext(_ext) {
+    // Install register index arrays before any set{Src,Dest}RegIdx calls.
+    setRegIdxArrays(
+        reinterpret_cast<RegIdArrayPtr>(&AVXOpBase::srcRegIdxArr),
+        reinterpret_cast<RegIdArrayPtr>(&AVXOpBase::destRegIdxArr));
+    _numSrcRegs = 0;
+    _numDestRegs = 0;
+    for (auto &c : _numTypedDestRegs) { c = 0; }
+    fprintf(stderr, "[AVX-CONSTRUCT] mnem=%s destVL=%u srcVL=%u dest=%u src1=%u src2=%u\n",
+            _mnem, destVL, srcVL, dest, src1, src2);
     assert((destVL % sizeof(uint64_t) == 0) && "Invalid destVL.\n");
     assert((srcVL % sizeof(uint64_t) == 0) && "Invalid srcVL.\n");
   }
@@ -288,10 +312,13 @@ protected:
   // A helper function to add dest regs.
   inline void addAVXDestRegs() {
     auto vDestRegs = destVL / sizeof(uint64_t);
+    fprintf(stderr, "[AVX-DESTREGS] destVL=%u vDestRegs=%zu dest=%u\n", 
+            destVL, vDestRegs, dest);
     assert(vDestRegs <= NumXMMSubRegs && "DestVL overflow.");
     _numDestRegs = vDestRegs;
     _numTypedDestRegs[FloatRegClass] = vDestRegs;
     for (int i = 0; i < vDestRegs; i++) {
+      fprintf(stderr, "[AVX-DESTREGS]   reg[%d] = FloatReg %u\n", i, dest + i);
       setDestRegIdx(i, RegId(floatRegClass, dest + i));
     }
   }
