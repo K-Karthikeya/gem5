@@ -34,8 +34,12 @@ run: $(BIN)
 	./$(BIN)
 
 disasm: $(BIN)
-	objdump -d $(BIN) | grep -E "0f(10|11|28|29|57|58|59|77)" || true
-	@echo "(If other AVX/VEX opcodes appear above, adjust CFLAGS to suppress them.)"
+	@echo "== Expected AVX mnemonics present (by name) =="
+	objdump -d $(BIN) | grep -Ei "\b(vmovups|vmovaps|vaddps|vmulps|vxorps|vzeroupper)\b" || true
+	@echo "\n== Any other V* vector mnemonics (should be empty) =="
+	objdump -d $(BIN) | grep -Ei "\bv[a-z0-9_]+\b" | \
+	  grep -Evi "\b(vmovups|vmovaps|vaddps|vmulps|vxorps|vzeroupper)\b" || true
+	@echo "\n(If lines appear above, the compiler emitted extra AVX/VEX instructions.\nAdjust CFLAGS or lower optimization.)"
 
 clean:
 	rm -f $(OBJ) $(BIN)
