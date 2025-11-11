@@ -259,17 +259,18 @@ protected:
     // sub-registers. We currently map one 64-bit subregister per iteration.
     // For 128-bit ops destVL=16 => vRegs=2 (two 64b pieces). For 256-bit ops
     // destVL=32 => vRegs=4.
-    // Operand index ordering within StaticInst is:
-    //   [dest0..destN-1, src10, src20, src11, src21, ...]
-    // i.e., all destination operands first, then sources interleaved per lane.
-    // Therefore, when reading sources we must offset by the number of dest
-    // operands.
+  // Operand index ordering within StaticInst is:
+  //   [dest0..destN-1, src10..src1N-1, src20..src2N-1]
+  // i.e., all destination operands first, then all src1 lanes, then all src2 lanes.
+  // Therefore, when reading sources we must offset by the number of dest operands,
+  // and then index into the grouped src1/src2 arrays.
     auto vRegs = destVL / sizeof(uint64_t);
     const int destOffset = _numDestRegs; // number of destination operands
     for (int i = 0; i < vRegs; i++) {
       FloatInt s1, s2;
-      s1.ul = xc->getRegOperand(this, destOffset + i * 2 + 0);
-      s2.ul = xc->getRegOperand(this, destOffset + i * 2 + 1);
+      // With sources registered as [src1(0..N-1), src2(0..N-1)]
+      s1.ul = xc->getRegOperand(this, destOffset + i);
+      s2.ul = xc->getRegOperand(this, destOffset + vRegs + i);
       auto d = this->calcPackedBinaryOp(s1, s2, op);
       if (op == BinaryOp::FloatAdd) {
         // Each 64-bit chunk carries two 32-bit floats in order {f1,f2}.

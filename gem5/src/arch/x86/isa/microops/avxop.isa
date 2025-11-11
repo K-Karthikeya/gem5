@@ -181,15 +181,20 @@ let {{
             (unsigned)baseDest, (unsigned)baseSrc1, (unsigned)baseSrc2, (unsigned)vRegs);
 
         _numSrcRegs = 2 * vRegs;
+        // Register all src1 lanes first, then all src2 lanes. This matches
+        // StaticInst operand ordering expectations used by getRegOperand.
         for (int i = 0; i < vRegs; ++i) {
-        unsigned dIdx = baseDest + i;
-        unsigned s1Idx = baseSrc1 + i;
-        unsigned s2Idx = baseSrc2 + i;
-        fprintf(stderr,
-            "[AVX-SRCMAP] lane=%d destIdx=%u src1Idx=%u src2Idx=%u (fixed)\\n",
-            i, dIdx, s1Idx, s2Idx);
-        setSrcRegIdx(i*2,   RegId(floatRegClass, s1Idx));
-        setSrcRegIdx(i*2+1, RegId(floatRegClass, s2Idx));
+            unsigned dIdx = baseDest + i;
+            unsigned s1Idx = baseSrc1 + i;
+            unsigned s2Idx = baseSrc2 + i;
+            fprintf(stderr,
+                "[AVX-SRCMAP] lane=%d destIdx=%u src1Idx=%u src2Idx=%u (fixed)\\n",
+                i, dIdx, s1Idx, s2Idx);
+            setSrcRegIdx(i, RegId(floatRegClass, s1Idx));
+        }
+        for (int i = 0; i < vRegs; ++i) {
+            unsigned s2Idx = baseSrc2 + i;
+            setSrcRegIdx(vRegs + i, RegId(floatRegClass, s2Idx));
         }
         """
 
