@@ -227,10 +227,12 @@ let {{
                 # This might refer to memory or to a register. We need to
                 # divide it up farther.
                 regEnv = copy.copy(env)
-                # For the register form of E/Q/W, the register comes from the
-                # ModRM.rm field. Bind this to env.regm so that microcode
-                # symbols like xmm0m (rm-selected XMM/YMM) resolve correctly.
-                regEnv.regmUsed = True
+                # Only treat the register form of the W (XMM/YMM) operand as
+                # using env.regm so AVX macroops can reference xmm0m. E/Q are
+                # widely used integer/MMX forms; marking them regm would bloat
+                # the emulation environment and exhaust register specialization.
+                if opType.tag == "W":
+                    regEnv.regmUsed = True
                 regEnv.addReg(ModRMRMIndex)
 
                 # This refers to memory. The macroop constructor should set up
