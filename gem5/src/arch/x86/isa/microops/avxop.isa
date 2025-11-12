@@ -201,15 +201,55 @@ let {{
     class vaddf(varithp):
         opClass = 'SimdFloatAddOp'
         constructorCode = varithp.constructorCode
-        code = 'fprintf(stderr, "[AVX-TRACE] vaddf enter VL=%u size=%u\\n", destVL, srcSize); this->doPackedBinaryOp(xc, BinaryOp::FloatAdd);'
+        code = '''
+            fprintf(stderr, "[AVX-TRACE] vaddf enter VL=%u size=%u\n", destVL, srcSize);
+            // Pre-operation dump of logical src1/src2 operand values via operand indices.
+            {
+                auto vRegs = destVL / sizeof(uint64_t);
+                int destOffset = _numDestRegs;
+                for (int i = 0; i < vRegs; ++i) {
+                    uint64_t pre_s1 = xc->getRegOperand(this, destOffset + i);
+                    uint64_t pre_s2 = xc->getRegOperand(this, destOffset + vRegs + i);
+                    fprintf(stderr, "[AVX-PRE] lane=%d pre_s1=%#016llx pre_s2=%#016llx\n", i,
+                            (unsigned long long)pre_s1, (unsigned long long)pre_s2);
+                }
+            }
+            this->doPackedBinaryOp(xc, BinaryOp::FloatAdd);
+        '''
 
     class vmulf(varithp):
         opClass = 'SimdFloatMultOp'
         constructorCode = varithp.constructorCode
-        code = 'fprintf(stderr, "[AVX-TRACE] vmulf enter VL=%u size=%u\\n", destVL, srcSize); this->doPackedBinaryOp(xc, BinaryOp::FloatMul);'
+        code = '''
+            fprintf(stderr, "[AVX-TRACE] vmulf enter VL=%u size=%u\n", destVL, srcSize);
+            {
+                auto vRegs = destVL / sizeof(uint64_t);
+                int destOffset = _numDestRegs;
+                for (int i = 0; i < vRegs; ++i) {
+                    uint64_t pre_s1 = xc->getRegOperand(this, destOffset + i);
+                    uint64_t pre_s2 = xc->getRegOperand(this, destOffset + vRegs + i);
+                    fprintf(stderr, "[AVX-PRE] lane=%d pre_s1=%#016llx pre_s2=%#016llx\n", i,
+                            (unsigned long long)pre_s1, (unsigned long long)pre_s2);
+                }
+            }
+            this->doPackedBinaryOp(xc, BinaryOp::FloatMul);
+        '''
 
     class vxorf(varithp):
         opClass = 'SimdAddOp'
         constructorCode = varithp.constructorCode
-        code = 'fprintf(stderr, "[AVX-TRACE] vxorf enter VL=%u size=%u\\n", destVL, srcSize); this->doPackedBinaryOp(xc, BinaryOp::IntXor);'
+        code = '''
+            fprintf(stderr, "[AVX-TRACE] vxorf enter VL=%u size=%u\n", destVL, srcSize);
+            {
+                auto vRegs = destVL / sizeof(uint64_t);
+                int destOffset = _numDestRegs;
+                for (int i = 0; i < vRegs; ++i) {
+                    uint64_t pre_s1 = xc->getRegOperand(this, destOffset + i);
+                    uint64_t pre_s2 = xc->getRegOperand(this, destOffset + vRegs + i);
+                    fprintf(stderr, "[AVX-PRE] lane=%d pre_s1=%#016llx pre_s2=%#016llx\n", i,
+                            (unsigned long long)pre_s1, (unsigned long long)pre_s2);
+                }
+            }
+            this->doPackedBinaryOp(xc, BinaryOp::IntXor);
+        '''
 }};
